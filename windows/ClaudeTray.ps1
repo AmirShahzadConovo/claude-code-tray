@@ -35,6 +35,21 @@ function Log([string]$msg) {
     } catch {}
 }
 
+# user preferences (currently just mute), persisted across restarts and updates
+$configFile = Join-Path $dir 'config.json'
+$script:muted = $false
+try {
+    if (Test-Path $configFile) {
+        $cfg = Get-Content $configFile -Raw | ConvertFrom-Json
+        if ($cfg.muted) { $script:muted = $true }
+    }
+} catch {}
+function Save-Config {
+    try {
+        @{ muted = [bool]$script:muted } | ConvertTo-Json -Compress | Set-Content $configFile -Encoding utf8
+    } catch {}
+}
+
 $colors = @{
     'working'     = [System.Drawing.Color]::FromArgb(245, 158, 11)   # amber
     'done'        = [System.Drawing.Color]::FromArgb(34, 197, 94)    # green
@@ -175,7 +190,7 @@ function Update-Status {
     if ($notify.Text -ne $tip) { $notify.Text = $tip }
 
     # chime on transitions, but not for state discovered at startup
-    if (-not $script:firstTick) {
+    if (-not $script:firstTick -and -not $script:muted) {
         if ($playInput)   { [System.Media.SystemSounds]::Exclamation.Play() }
         elseif ($playDone){ [System.Media.SystemSounds]::Asterisk.Play() }
     }
@@ -209,6 +224,16 @@ $clearItem.add_Click({
         Log 'sessions cleared manually'
     } catch { Log "clear error: $_" }
 })
+$muteItem = New-Object System.Windows.Forms.ToolStripMenuItem 'Mute sounds'
+$muteItem.CheckOnClick = $true
+$muteItem.Checked = $script:muted
+$muteItem.add_CheckedChanged({
+    param($sender, $e)
+    $script:muted = $sender.Checked
+    Save-Config
+    Log $(if ($script:muted) { 'sounds muted' } else { 'sounds unmuted' })
+})
+$menu.Items.Add($muteItem) | Out-Null
 $menu.Items.Add('-') | Out-Null
 $exitItem = $menu.Items.Add('Exit')
 $exitItem.add_Click({

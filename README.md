@@ -10,7 +10,7 @@ A tiny system-tray/top-bar status light for [Claude Code](https://code.claude.co
 | ⬜ Hollow gray outline | No active sessions |
 | Number badge | 2+ sessions need your attention |
 
-It's DND-proof by design: a persistent tray icon, not a notification, so Focus Assist / Do Not Disturb can't suppress it. Click the icon to focus VSCode. Right-click for menu (log, clear stuck sessions, exit).
+It's DND-proof by design: a persistent tray icon, not a notification, so Focus Assist / Do Not Disturb can't suppress it. Click the icon to focus VSCode. Right-click for menu: focus VSCode, open log, clear stuck sessions, **mute sounds** (persisted — for anyone who wants a purely visual indicator), exit.
 
 ## Install
 

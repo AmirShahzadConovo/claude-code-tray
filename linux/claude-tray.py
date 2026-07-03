@@ -31,6 +31,7 @@ import cairo
 BASE = os.path.dirname(os.path.abspath(__file__))
 SESSIONS_DIR = os.path.join(BASE, "sessions")
 LOG_FILE = os.path.join(BASE, "tray.log")
+CONFIG_FILE = os.path.join(BASE, "config.json")
 ICON_DIR = os.path.join(os.path.expanduser("~"), ".cache", "claude-tray-icons")
 
 COLORS = {
@@ -140,12 +141,21 @@ def play(sound):
         pass
 
 
+def load_muted():
+    try:
+        with open(CONFIG_FILE, encoding="utf-8") as f:
+            return bool(json.load(f).get("muted"))
+    except (OSError, ValueError):
+        return False
+
+
 class TrayApp:
     def __init__(self):
         self.session_states = {}
         self.current_key = None
         self.first_tick = True
         self.pulse_flip = False
+        self.muted = load_muted()
 
         self.ind = AppIndicator.Indicator.new(
             "claude-tray", "", AppIndicator.IndicatorCategory.APPLICATION_STATUS)
@@ -165,6 +175,10 @@ class TrayApp:
             item = Gtk.MenuItem(label=label)
             item.connect("activate", cb)
             menu.append(item)
+        mute_item = Gtk.CheckMenuItem(label="Mute sounds")
+        mute_item.set_active(self.muted)
+        mute_item.connect("toggled", self.on_mute_toggled)
+        menu.append(mute_item)
         menu.append(Gtk.SeparatorMenuItem())
         quit_item = Gtk.MenuItem(label="Exit")
         quit_item.connect("activate", Gtk.main_quit)
@@ -278,7 +292,7 @@ class TrayApp:
         self.status_item.set_label(tip)
         self.ind.set_title(tip)
 
-        if not self.first_tick:
+        if not self.first_tick and not self.muted:
             if play_input:
                 play(SOUND_INPUT)
             elif play_done:
@@ -293,6 +307,15 @@ class TrayApp:
                     return
             except FileNotFoundError:
                 continue
+
+    def on_mute_toggled(self, item):
+        self.muted = item.get_active()
+        try:
+            with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+                json.dump({"muted": self.muted}, f)
+        except OSError:
+            pass
+        log("sounds muted" if self.muted else "sounds unmuted")
 
     def open_log(self, _item):
         subprocess.Popen(["xdg-open", LOG_FILE])
