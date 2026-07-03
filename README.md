@@ -17,8 +17,8 @@ It's DND-proof by design: a persistent tray icon, not a notification, so Focus A
 ### Windows 10/11
 
 ```powershell
-git clone <repo-url>
-cd claude-tray-widget
+git clone https://github.com/AmirShahzadConovo/claude-code-tray.git
+cd claude-code-tray
 powershell -ExecutionPolicy Bypass -File windows\install.ps1
 ```
 
@@ -30,8 +30,8 @@ Then drag the icon out of the tray overflow (`^`) once so it stays visible, and 
 
 ```bash
 sudo apt install python3-gi python3-gi-cairo gir1.2-ayatanaappindicator3-0.1
-git clone <repo-url>
-cd claude-tray-widget
+git clone https://github.com/AmirShahzadConovo/claude-code-tray.git
+cd claude-code-tray
 bash linux/install.sh
 ```
 
