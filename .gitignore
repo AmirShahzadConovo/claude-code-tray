@@ -1,0 +1,5 @@
+sessions/
+tray.log
+*.bak
+.tray.lock
+app.ico
