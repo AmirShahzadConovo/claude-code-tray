@@ -31,7 +31,7 @@ The widget auto-starts at login. To start it manually (e.g. after exiting it), p
 ### Ubuntu (native desktop)
 
 ```bash
-sudo apt install python3-gi python3-gi-cairo gir1.2-ayatanaappindicator3-0.1
+sudo apt install python3-gi python3-gi-cairo gir1.2-gtk-3.0 gir1.2-ayatanaappindicator3-0.1
 git clone https://github.com/AmirShahzadConovo/claude-code-tray.git
 cd claude-code-tray
 bash linux/install.sh
