@@ -24,6 +24,8 @@ powershell -ExecutionPolicy Bypass -File windows\install.ps1
 
 Then drag the icon out of the tray overflow (`^`) once so it stays visible, and restart your Claude Code sessions so the hooks load.
 
+The widget auto-starts at login. To start it manually (e.g. after exiting it), press Win and search for **Claude Tray Widget**.
+
 > **WSL users**: if you run Claude Code through the VSCode extension on Windows (even with projects inside WSL), use this Windows installer â€” the extension runs Windows-side.
 
 ### Ubuntu (native desktop)
@@ -36,6 +38,8 @@ bash linux/install.sh
 ```
 
 Restart your Claude Code sessions so the hooks load.
+
+The widget auto-starts at login and appears in the **top bar** (near the clock). To start it manually (e.g. after exiting it), open Activities and search for **Claude Tray Widget**.
 
 ### macOS
 
@@ -66,4 +70,4 @@ Note: the `Notification` hook event does **not** fire in the VSCode extension â€
 Remove the hook entries from `~/.claude/settings.json` (the installer backs it up as `settings.json.tray-widget.bak` before modifying), then:
 
 - **Windows**: delete `%USERPROFILE%\.claude\tray-widget` and the two "Claude Tray Widget" shortcuts (Start Menu and its Startup subfolder).
-- **Ubuntu**: `pkill -f claude-tray.py`, delete `~/.claude/tray-widget` and `~/.config/autostart/claude-tray.desktop`.
+- **Ubuntu**: `pkill -f claude-tray.py`, delete `~/.claude/tray-widget`, `~/.config/autostart/claude-tray.desktop`, and `~/.local/share/applications/claude-tray.desktop`.

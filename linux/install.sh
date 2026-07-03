@@ -23,13 +23,13 @@ import cairo
     echo "  sudo apt install python3-gi python3-gi-cairo gir1.2-ayatanaappindicator3-0.1"
     exit 1
 fi
-echo "[1/5] Dependencies OK"
+echo "[1/6] Dependencies OK"
 
 # ---- 1. copy widget files ----
 mkdir -p "$TARGET"
 cp "$SRC/claude-tray.py" "$SRC/set-status.py" "$TARGET/"
 chmod +x "$TARGET/claude-tray.py" "$TARGET/set-status.py"
-echo "[2/5] Widget files installed to $TARGET"
+echo "[2/6] Widget files installed to $TARGET"
 
 # ---- 2. merge hooks into settings.json (python for safe JSON handling) ----
 python3 - "$SET_STATUS" <<'PYEOF'
@@ -72,10 +72,26 @@ for event, matcher, state in events:
 
 with open(path, "w", encoding="utf-8") as f:
     json.dump(settings, f, indent=2)
-print("[3/5] Hooks merged into settings.json (%d added, %d already present)" % (added, len(events) - added))
+print("[3/6] Hooks merged into settings.json (%d added, %d already present)" % (added, len(events) - added))
 PYEOF
 
-# ---- 3. autostart at login ----
+# ---- 3. app-grid launcher (Activities / dash search) ----
+python3 "$TARGET/claude-tray.py" --make-icon "$TARGET/app.png" 128
+mkdir -p "$HOME/.local/share/applications"
+cat > "$HOME/.local/share/applications/claude-tray.desktop" <<EOF
+[Desktop Entry]
+Type=Application
+Name=Claude Tray Widget
+Comment=Claude Code session status in the top bar
+Exec=python3 $TARGET/claude-tray.py
+Icon=$TARGET/app.png
+Terminal=false
+Categories=Utility;
+EOF
+update-desktop-database "$HOME/.local/share/applications" 2>/dev/null || true
+echo "[4/6] App-grid launcher entry created"
+
+# ---- 4. autostart at login ----
 mkdir -p "$HOME/.config/autostart"
 cat > "$HOME/.config/autostart/claude-tray.desktop" <<EOF
 [Desktop Entry]
@@ -83,16 +99,17 @@ Type=Application
 Name=Claude Tray Widget
 Comment=Claude Code session status in the top bar
 Exec=python3 $TARGET/claude-tray.py
+Icon=$TARGET/app.png
 X-GNOME-Autostart-enabled=true
 EOF
-echo "[4/5] Autostart entry created"
+echo "[5/6] Autostart entry created"
 
-# ---- 4. start (or restart) the widget ----
+# ---- 5. start (or restart) the widget ----
 pkill -f "claude-tray.py" 2>/dev/null || true
 sleep 1
 nohup python3 "$TARGET/claude-tray.py" >/dev/null 2>&1 &
 disown
-echo "[5/5] Widget started"
+echo "[6/6] Widget started"
 
 echo
 echo "Done. Restart your Claude Code sessions so the hooks load."

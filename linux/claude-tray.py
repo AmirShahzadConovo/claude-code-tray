@@ -63,14 +63,8 @@ def rounded_rect(ctx, x, y, w, h, r):
     ctx.close_path()
 
 
-def render_icon(key, color, badge, style):
-    """Render a 32x32 squircle PNG into ICON_DIR; returns the icon name."""
-    path = os.path.join(ICON_DIR, key + ".png")
-    if os.path.exists(path):
-        return key
-    os.makedirs(ICON_DIR, exist_ok=True)
-    surf = cairo.ImageSurface(cairo.FORMAT_ARGB32, 32, 32)
-    ctx = cairo.Context(surf)
+def draw_squircle(ctx, color, badge, style):
+    """Draw the status squircle into a 32x32 coordinate space."""
     r, g, b = (c / 255.0 for c in color)
 
     if style == "outline":
@@ -106,8 +100,27 @@ def render_icon(key, color, badge, style):
             ext = ctx.text_extents(text)
             ctx.move_to(16 - ext.width / 2 - ext.x_bearing, 16 - ext.height / 2 - ext.y_bearing)
             ctx.show_text(text)
+
+
+def render_icon(key, color, badge, style):
+    """Render a 32x32 squircle PNG into ICON_DIR; returns the icon name."""
+    path = os.path.join(ICON_DIR, key + ".png")
+    if os.path.exists(path):
+        return key
+    os.makedirs(ICON_DIR, exist_ok=True)
+    surf = cairo.ImageSurface(cairo.FORMAT_ARGB32, 32, 32)
+    draw_squircle(cairo.Context(surf), color, badge, style)
     surf.write_to_png(path)
     return key
+
+
+def render_launcher_icon(path, size=128):
+    """Render the app-grid/launcher icon (blue squircle) at the given size."""
+    surf = cairo.ImageSurface(cairo.FORMAT_ARGB32, size, size)
+    ctx = cairo.Context(surf)
+    ctx.scale(size / 32.0, size / 32.0)
+    draw_squircle(ctx, COLORS["needs-input"], 0, "filled")
+    surf.write_to_png(path)
 
 
 def top_bar_is_light():
@@ -295,6 +308,11 @@ class TrayApp:
 
 
 def main():
+    # utility mode used by install.sh to produce the app-grid launcher icon
+    if len(sys.argv) >= 3 and sys.argv[1] == "--make-icon":
+        render_launcher_icon(sys.argv[2], int(sys.argv[3]) if len(sys.argv) > 3 else 128)
+        return
+
     # single instance via an exclusive lock
     lock = open(os.path.join(BASE, ".tray.lock"), "w")
     try:
