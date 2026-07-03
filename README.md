@@ -67,7 +67,9 @@ Note: the `Notification` hook event does **not** fire in the VSCode extension â€
 
 ## Uninstall
 
-Remove the hook entries from `~/.claude/settings.json` (the installer backs it up as `settings.json.tray-widget.bak` before modifying), then:
+From the cloned repo folder:
 
-- **Windows**: delete `%USERPROFILE%\.claude\tray-widget` and the two "Claude Tray Widget" shortcuts (Start Menu and its Startup subfolder).
-- **Ubuntu**: `pkill -f claude-tray.py`, delete `~/.claude/tray-widget`, `~/.config/autostart/claude-tray.desktop`, and `~/.local/share/applications/claude-tray.desktop`.
+- **Windows**: `powershell -ExecutionPolicy Bypass -File windows\uninstall.ps1`
+- **Ubuntu**: `bash linux/uninstall.sh`
+
+The uninstaller removes the widget's hook entries from `~/.claude/settings.json` (writing a backup next to it first â€” your other hooks and settings are preserved), stops the widget, and deletes the installed files, shortcuts, and launcher/autostart entries. Restart your Claude Code sessions afterwards so the hooks unload.
